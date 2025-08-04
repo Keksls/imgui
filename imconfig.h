@@ -140,3 +140,5 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
+#include "imgui_assert_handler.h"
+#define IM_ASSERT(_EXPR) do { if (!(_EXPR)) HandleImGuiAssert(#_EXPR, __FILE__, __LINE__); } while(0)

@@ -591,17 +591,69 @@ jobs:
       run: xcodebuild -project examples/example_apple_opengl2/example_apple_opengl2.xcodeproj -target example_osx_opengl2
       if: github.event_name == 'workflow_run'
 
-  Build-iOS:
+  Build-iOS-XCFramework:
     runs-on: macos-14
-    name: Build - iOS
+    name: Build - iOS XCFramework
+
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
 
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-    - name: Build example_apple_metal
-      run: |
-        # Code signing is required, but we disable it because it is irrelevant for CI builds.
-        xcodebuild -project examples/example_apple_metal/example_apple_metal.xcodeproj -target example_apple_metal_ios CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      - name: Init submodules
+        shell: bash
+        run: |
+          git submodule update --init cimgui
+          cd cimgui
+          git checkout fuguiBuild
+          git submodule update --init imgui
+          cd imgui
+          git checkout fuguiBuild
+
+      - name: Build ImGui static lib for iPhoneOS
+        shell: bash
+        run: |
+          mkdir -p build/ios/device
+          for file in imgui.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp; do
+            xcrun --sdk iphoneos clang++ -std=c++17 -c "cimgui/imgui/$file" \
+              -I cimgui/imgui \
+              -o "build/ios/device/${file%.cpp}.o"
+          done
+
+          libtool -static -o build/ios/device/libimgui.a build/ios/device/*.o
+
+      - name: Build ImGui static lib for iPhoneSimulator
+        shell: bash
+        run: |
+          mkdir -p build/ios/simulator
+          for file in imgui.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp; do
+            xcrun --sdk iphonesimulator clang++ -std=c++17 -c "cimgui/imgui/$file" \
+              -I cimgui/imgui \
+              -o "build/ios/simulator/${file%.cpp}.o"
+          done
+
+          libtool -static -o build/ios/simulator/libimgui.a build/ios/simulator/*.o
+
+      - name: Create XCFramework
+        shell: bash
+        run: |
+          mkdir -p artifacts/include
+          cp cimgui/imgui/imgui.h artifacts/include/
+          cp cimgui/imgui/imconfig.h artifacts/include/
+          cp cimgui/imgui/imgui_internal.h artifacts/include/
+
+          xcodebuild -create-xcframework \
+            -library build/ios/device/libimgui.a -headers artifacts/include \
+            -library build/ios/simulator/libimgui.a -headers artifacts/include \
+            -output artifacts/ImGui.xcframework
+
+      - name: Upload XCFramework
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImGui-iOS-XCFramework
+          path: artifacts/ImGui.xcframework
 
   Build-Emscripten:
     runs-on: ubuntu-latest

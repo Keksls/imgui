@@ -27,7 +27,7 @@ extern "C" void HandleImGuiAssert(const char* expr, const char* file, int line)
         DefaultAssertCallback(expr, file, line); // fallback en cas d’erreur
 }
 
-extern "C" IMGUI_IMPL_API void SetImGuiAssertCallback(AssertCallbackFn callback)
+extern "C" void SetImGuiAssertCallback(AssertCallbackFn callback)
 {
     GetAssertCallback() = callback;
 }

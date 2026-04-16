@@ -20,14 +20,14 @@ static AssertCallbackFn& GetAssertCallback()
 
 extern "C" void HandleImGuiAssert(const char* expr, const char* file, int line)
 {
-    auto cb = GetAssertCallback();
+    AssertCallbackFn cb = GetAssertCallback();
     if (cb)
         cb(expr, file, line);
     else
-        DefaultAssertCallback(expr, file, line); // fallback en cas d’erreur
+        DefaultAssertCallback(expr, file, line);
 }
 
-IMGUI_IMPL_API void SetImGuiAssertCallback(AssertCallbackFn callback)
+extern "C" void SetImGuiAssertCallback(AssertCallbackFn callback)
 {
     GetAssertCallback() = callback;
 }

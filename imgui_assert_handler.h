@@ -21,7 +21,6 @@ extern "C" {
 
     typedef void(*AssertCallbackFn)(const char* expr, const char* file, int line);
 
-    // Only declarations here
     void SetImGuiAssertCallback(AssertCallbackFn callback);
     void HandleImGuiAssert(const char* expr, const char* file, int line);
 

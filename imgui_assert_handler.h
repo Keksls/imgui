@@ -22,7 +22,7 @@ extern "C" {
     typedef void(*AssertCallbackFn)(const char* expr, const char* file, int line);
 
     // Only declarations here
-    IMGUI_API void SetImGuiAssertCallback(AssertCallbackFn callback);
+    void SetImGuiAssertCallback(AssertCallbackFn callback);
     void HandleImGuiAssert(const char* expr, const char* file, int line);
 
 #ifdef __cplusplus

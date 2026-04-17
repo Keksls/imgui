@@ -15,7 +15,7 @@ static AssertCallbackFn& GetAssertCallback()
     return callback;
 }
 
-extern "C" void HandleImGuiAssert(const char* expr, const char* file, int line)
+FUGUI_ASSERT_API void HandleImGuiAssert(const char* expr, const char* file, int line)
 {
     AssertCallbackFn cb = GetAssertCallback();
     if (cb)
@@ -24,7 +24,7 @@ extern "C" void HandleImGuiAssert(const char* expr, const char* file, int line)
         DefaultAssertCallback(expr, file, line);
 }
 
-extern "C" void SetImGuiAssertCallback(AssertCallbackFn callback)
+FUGUI_ASSERT_API void SetImGuiAssertCallback(AssertCallbackFn callback)
 {
     GetAssertCallback() = callback;
 }
